@@ -2,15 +2,14 @@ const router = require("express").Router();
 
 const db = require("../models");
 
-router.get("/workouts", (req, res) => {
-  db.Workout.find({})
-    .sort({ day: 1 })
-    .then((dbWorkout) => {
-      res.json(dbWorkout);
-    })
-    .catch((err) => {
-      res.json(err);
-    });
+router.get("/workouts", async (req, res) => {
+  try {
+    const latestWorkout = await db.Workout.findOne({}).sort({ day: -1 });
+    console.log(latestWorkout.exercises);
+    res.json(latestWorkout);
+  } catch (e) {
+    res.json(e);
+  }
 });
 
 module.exports = router;
