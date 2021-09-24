@@ -1,18 +1,43 @@
 const router = require("express").Router();
+const mongoose = require("mongoose");
 
 const db = require("../models");
 
 router.get("/api/workouts", async (req, res) => {
-  try {
-    const latestWorkout = await db.Workout.find({});
-    console.log(latestWorkout);
-    res.json(latestWorkout);
-  } catch (e) {
-    res.json(e);
-  }
+  db.Workout.aggregate([
+    {
+      $set: {
+        totalDuration: { $sum: "$exercises.duration" },
+      },
+    },
+  ]).then((result) => {
+    res.json(result);
+  });
+});
+
+router.get("/api/workouts/range", (req, res) => {
+  console.log("Dash Board to get all information");
+
+  db.Workout.aggregate([
+    {
+      $set: {
+        totalDuration: { $sum: "$exercises.duration" },
+      },
+    },
+  ])
+    .sort({ day: -1 })
+    .limit(7)
+    .sort({ day: 1 })
+    .then((result) => {
+      console.log("Result of Aggregate");
+      console.log(result);
+      res.json(result);
+    });
 });
 
 router.put("/api/workouts/:id", async (req, res) => {
+  console.log("hello");
+  console.log(req.body);
   await db.Workout.findOneAndUpdate(
     {
       _id: req.params.id,
@@ -26,10 +51,16 @@ router.put("/api/workouts/:id", async (req, res) => {
       if (err) {
         res.json(err);
       } else {
+        console.log(data);
         res.json(data);
       }
     }
   );
+});
+
+router.post("/api/workouts", async (req, res) => {
+  const data = await db.Workout.create({});
+  res.json(data);
 });
 
 module.exports = router;
