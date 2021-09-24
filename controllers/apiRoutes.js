@@ -2,7 +2,7 @@ const router = require("express").Router();
 const mongoose = require("mongoose");
 
 const db = require("../models");
-
+//Get Route for one workout
 router.get("/api/workouts", async (req, res) => {
   db.Workout.aggregate([
     {
